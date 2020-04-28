@@ -1,0 +1,6 @@
+#BlueJ class context
+comment0.target=Casket
+comment0.text=\r\n\ Write\ a\ description\ of\ class\ Casket\ here\ inherited\ from\ Item.\r\n
+comment1.params=containedItem
+comment1.target=Casket(Item)
+numComments=2
