@@ -73,10 +73,12 @@ public class Player
      */
     private void printHelp() 
     {
-        System.out.println("You are lost. You are alone. You wander");
-        System.out.println("around at the university.");
+        System.out.println("You are on a mission of retieving your inheritance");
+        System.out.println("in a creepy mansion full of all sorts of uncanny relicts");
+        System.out.println("and ancient artefacts. A totally normal situation ");
+        System.out.println("to find yourself in.");
         System.out.println();
-        System.out.println("Your command words are:");
+        System.out.println("Here is what you can do:");
         parser.showCommands();
     }
 
@@ -102,7 +104,7 @@ public class Player
         }
         else {
             currentRoom = nextRoom;
-            System.out.println(currentRoom.getLongDescription());
+            currentRoom.printDescription();
         }
     }
 
@@ -147,11 +149,8 @@ public class Player
         {   
             if(pickLock())
             {
-                if(extractedItem.getIsTarget())//удалить условие после имплементации наследствия
-                    {   //поменять на extractedItem.itemWithin;
-                        extractedItem = new Item("ring", "apparently the one your aunt left you",1000,5,false,false);
-                        System.out.println("There is something inside the casket.");
-                    }
+                extractedItem = extractedItem.getContainedItem();  //SHOULDN'T BE HERE
+                System.out.println("There is something inside the casket.");
             }
         }
             inventory.add(extractedItem);
@@ -212,7 +211,7 @@ public class Player
             }
         if(!isOpened)
             {
-                System.out.println("You hear a sound of the lock getting stick and realize that");
+                System.out.println("You hear a sound of the lock getting stuck and realize that");
                 System.out.println("after sevelar attempts of hacking it gets broken. You decide to");
                 System.out.println("leave it be for now. Your hacking tool is not perfect after all!");
             }

@@ -54,7 +54,7 @@ public class Room
      * @return The short description of the room
      * (the one that was defined in the constructor).
      */
-    public String getShortDescription()
+    public String getDescription()
     {
         return description;
     }
@@ -65,9 +65,9 @@ public class Room
      *     Exits: north west
      * @return A long description of this room
      */
-    public String getLongDescription()
+    public void printDescription()
     {
-        return "You are " + description + ".\n" + getExitString();
+        System.out.printf("%n %s %n",description);
     }
 
     /**

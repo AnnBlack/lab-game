@@ -10,19 +10,17 @@ public class Item
     private int weight;
     private String name;
     boolean isCasket;
-    boolean isTarget;
 
     /**
      * Constructor for objects of class Item
      */
-    public Item(String name, String description, int score, int weight, boolean isCasket, boolean isTarget) 
+    public Item(String name, String description, int score, int weight, boolean isCasket) 
     {
         this.name = name;
         this.description = description;
         this.score = score;
         this.weight = weight;
         this.isCasket = isCasket;
-        this.isTarget = isTarget;
     }
     /**
      * methods:
@@ -31,7 +29,6 @@ public class Item
     {
         return description;
     }
-    
     public String getName()
     {
         return name;
@@ -40,8 +37,8 @@ public class Item
     {
         return isCasket;
     }
-    public boolean getIsTarget()
-    {
-        return isTarget;
+    public Item getContainedItem()
+    {   
+        return null;
     }
 }

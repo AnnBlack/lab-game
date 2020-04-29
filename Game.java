@@ -4,9 +4,9 @@
 
 public class Game 
 {
-    
     private Player player;
-        
+    public static Item casketItemRing; //NOT OKAY  
+    
     /**
      * Create the Game and initialise its internal map.
      */
@@ -21,11 +21,13 @@ public class Game
     private void initialize()
     {
         Room hall, secondFloor, questRoom, workshop, lab, bedroom;
-        Item hallCasket, hallFlowerPot, hallMagazine,secondFloorCasket;
+        Item hallFlowerPot, hallMagazine, casketItemPendant;
+        Casket hallCasket, secondFloorCasket;
+        
         
       
         // create the rooms
-        hall = new Room("hall the main entrance of the university");
+        hall = new Room("You are in a hall of what looks to be collector's apartements. %nAmongst all the other strange items that fill the room, %none thing that sticks out to you is a portrait on the wall above %nthe staircase (You assume it's the owner of this house). %nThe subject's eyes seem to follow you no matter where you go.");
         questRoom = new Room("in a lecture bedroom");
         workshop = new Room("in the campus workshop");
         secondFloor = new Room("in a computing secondFloor");
@@ -46,11 +48,13 @@ public class Game
         bedroom.setExit("west", secondFloor);
         
         //initializing items:
-        hallCasket = new Item("casket","a small wooden casket",20,100,true,true);
-        hallFlowerPot = new Item("pot","a ceramic pot with a dead flower inside",1,100,false,false);
-        hallMagazine = new Item("magazine","a magazine, supposedly delivered by mail",2,10,false,false);
+        casketItemRing = new Item("ring", "apparently the one your aunt left you",1000,5,false);
+        hallCasket = new Casket("casket","a small wooden casket",20,100,true,casketItemRing);
+        hallFlowerPot = new Item("pot","a ceramic pot with a dead flower inside",1,100,false);
+        hallMagazine = new Item("magazine","a magazine, supposedly delivered by mail",2,10,false);
         
-        secondFloorCasket = new Item("casket","a small blue dyed wooden casket",20,100,true,false);
+        casketItemPendant = new Item("pendant","a small pendant",200,5,false);
+        secondFloorCasket = new Casket("casket","a small blue dyed wooden casket",20,100,true,casketItemPendant);
         
         //filling rooms with items:
         hall.setItem(hallCasket);
@@ -61,6 +65,7 @@ public class Game
         
         
         player = new Player(530, hall);  // start Game hall
+        
     }
 
     /**
@@ -86,7 +91,7 @@ public class Game
         System.out.println("You are breaking into a house with a huge private collection (not entirely legal) of ancient relics and valuables to retrieve your family jewels.");
         System.out.println("Type 'help' if you need help.");
         System.out.println();
-        System.out.println("here should be description");
+        //System.out.println("here should be description");
     }
 
 }
