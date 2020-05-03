@@ -9,8 +9,10 @@ public class Player
     private Parser parser;
     private Room currentRoom;
     private ArrayList<Item> inventory;
-    private int maxCapacity;
-    private int score;
+    private final int maxCapacity = 430;
+    private int score=0;
+    private int weight=0;
+    private boolean gameCompleted=false;
 
     /**
      * Constructor for objects of class Player
@@ -21,13 +23,16 @@ public class Player
         inventory = new ArrayList<>();
         this.currentRoom = currentRoom;
     }
-    public void play() 
+    public boolean play() 
     {
         boolean finished = false;
+        currentRoom.printDescription();
+        currentRoom.printShortDescription();
         while (! finished) {
             Command command = parser.getCommand();
             finished = processCommand(command);
         }
+        return gameCompleted;
     }
     /**
      * Given a command, process (that is: execute) the command.
@@ -56,6 +61,12 @@ public class Player
         else if (commandWord.equals("drop")) {
            drop(command);
         }
+        else if (commandWord.equals("inspect")) {
+           inspect(command);
+        }
+        else if (commandWord.equals("leave")) {
+           wantToQuit = leave(command);
+        }
         else if (commandWord.equals("quit")) {
             wantToQuit = quit(command);
         }
@@ -72,13 +83,17 @@ public class Player
      * command words.
      */
     private void printHelp() 
-    {
-        System.out.println("You are on a mission of retieving your inheritance");
-        System.out.println("in a creepy mansion full of all sorts of uncanny relicts");
-        System.out.println("and ancient artefacts. A totally normal situation ");
+    {   
+        System.out.println();
+        System.out.println("You say the magic word. Nothing happens at first, then");
+        System.out.println("a striking realization hits you: ");
+        System.out.println("You are on a mission of retrieving your inheritance");
+        System.out.println("in a creepy mansion full of all sorts of uncanny relics");
+        System.out.println("and ancient artifacts. A totally normal situation ");
         System.out.println("to find yourself in.");
         System.out.println();
-        System.out.println("Here is what you can do:");
+        System.out.println("All the next possible steps become very clear to you:");
+        
         parser.showCommands();
     }
 
@@ -99,12 +114,22 @@ public class Player
         // Try to leave current room.
         Room nextRoom = currentRoom.getExit(direction);
 
-        if (nextRoom == null) {
+        if (nextRoom == null) 
+        {
             System.out.println("There is no door!");
+        }
+        else if((nextRoom.getName().contains("basement"))&&(!hasBasementKey()))
+        {
+            System.out.println("You don't have the key!"); 
+        }
+        else if(nextRoom.getName().contains("bedroom"))
+        {
+            nextRoom.printShortDescription(); 
         }
         else {
             currentRoom = nextRoom;
-            currentRoom.printDescription();
+            currentRoom.printDescription();//printing 1st part of description
+            currentRoom.printShortDescription();//printing 2nd part of description
         }
     }
 
@@ -123,6 +148,28 @@ public class Player
             return true;  // signal that we want to quit
         }
     }
+    private void inspect(Command command) 
+    {
+        if(command.hasSecondWord()) {
+            String itemName = command.getSecondWord();
+            boolean searching = true;
+            for (Item item : currentRoom.getItems()) 
+            {
+                if (item.getName().contains(itemName))
+                {item.printDescription();
+                searching = false;}
+            }
+            if(searching)
+            {   
+                System.out.printf("%nYou don't see it anywhere in the room.%n");
+            }
+        }
+        else 
+        {
+            currentRoom.printShortDescription();  //only print second part of description
+        }
+    }
+    
     /**
      * pick Up
      */
@@ -137,10 +184,10 @@ public class Player
         String itemName = command.getSecondWord();
         Item extractedItem;
         
-        System.out.println("looking for " +itemName);
-        if((extractedItem = currentRoom.extractItem(itemName))==null)
+        //System.out.println("looking for " +itemName);
+        if((extractedItem = currentRoom.getItem(itemName))==null)
         {
-            System.out.println("no such item");
+            System.out.println("You don't see it anywhere in the room");
             return;
         }
         else 
@@ -148,16 +195,30 @@ public class Player
             if(extractedItem.getIsCasket())//if the casket is found
         {   
             if(pickLock())
-            {
-                extractedItem = extractedItem.getContainedItem();  //SHOULDN'T BE HERE
-                System.out.println("There is something inside the casket.");
+            {   
+                currentRoom.removeItem(extractedItem);
+                extractedItem = extractedItem.getContainedItem();    //otherwise we get endless amount of caskets
+                currentRoom.setItem(extractedItem);
+                System.out.printf("There is a " + extractedItem.getName() +" inside. %n");
+                extractedItem.printDescription();
+                System.out.println();
             }
-        }
+        }   
+            if(weight+extractedItem.getWeight()<=maxCapacity)
+            {
             inventory.add(extractedItem);
+            currentRoom.removeItem(extractedItem);
+            score+=extractedItem.getScore();
+            weight+=extractedItem.getWeight();
             System.out.println("you put the " +extractedItem.getName() + " inside your bag");
             System.out.println();
-            System.out.println("your inventory has now:");
+            System.out.printf("your inventory now: %d/%d%nscore: %d%n", weight,maxCapacity,score);
             printInventory();
+            }
+            else if(extractedItem.getWeight()>500)
+            {System.out.println("Did you really think you could somehow fit that in your bag?");}
+            else
+            {System.out.println("Your inventory is full! Looks like you'll have to give some of that loot up");}
         }
 
     }
@@ -178,6 +239,8 @@ public class Player
             {
             currentRoom.setItem(item);
             inventory.remove(item);
+            score-=item.getScore();
+            weight-=item.getWeight();
             System.out.println("You drop the " +item.getName() + " on the floor");
             return;
             }
@@ -189,14 +252,13 @@ public class Player
      * the method that will loop and thus read the user input either until the number is quessed
      * or until all the attempts are used (currently 5)
      */
-    public boolean pickLock() //сделала отдельный метод для взлома, чтоыбы не зависел от взламываемого предмета
-    {                         //т.е. чтобы при желании можно было двери тоже взламывать.
+    public boolean pickLock() 
+    {                         
         boolean isOpened = false;
         int trueCode = getRandomNumberInRange(100,999);
         int permittedAttempts = 5;      
         
-        System.out.println("You try to pick the lock with your hacking tool");
-        System.out.println();
+        System.out.printf("%nYou try to pick the lock with your hacking tool%n");
         System.out.println("the generated true code: " +trueCode + " shouldn't be here in the final version ofc");
         for (int i = 0; i<permittedAttempts; i++)
             {
@@ -211,9 +273,9 @@ public class Player
             }
         if(!isOpened)
             {
-                System.out.println("You hear a sound of the lock getting stuck and realize that");
-                System.out.println("after sevelar attempts of hacking it gets broken. You decide to");
-                System.out.println("leave it be for now. Your hacking tool is not perfect after all!");
+                System.out.println("You hear the sound of the lock getting stuck and realize that");
+                System.out.println("after several attempts  it gets broken. You decide to leave it be");
+                System.out.println("for now. Your hacking tool is not perfect after all!");
             }
         return isOpened;
     }
@@ -223,7 +285,7 @@ public class Player
     public boolean hack(int guessCode, int trueCode)
     {   
         boolean isHacked = false;
-        int bulls=0;                //to be changed to dots and dashes later
+        int bulls=0;                //represent • and -
         int cows=0;
         
         HashMap<String,Integer> bullsCows=new HashMap<String,Integer>();
@@ -247,8 +309,8 @@ public class Player
             return isHacked;
         }
         
-        bullsCows.put("bulls",bulls);
-        bullsCows.put("cows",cows);
+        bullsCows.put("•",bulls);
+        bullsCows.put("-",cows);
         printTable(guessCode,bulls,cows);
         
         return isHacked;
@@ -263,15 +325,57 @@ public class Player
     
     public void printTable(int guessCode,int bulls, int cows)
     {
-        System.out.printf("%nyour guess: %d%nbulls: %d%ncows: %d%n",guessCode,bulls,cows);
+        System.out.printf("%nyour guess: %d%n•: %d%n-: %d%n",guessCode,bulls,cows);
         
     }
     
     private static int getRandomNumberInRange(int min, int max) 
     {
-        //min = 100;
-        //max = 999;
         Random r = new Random();
         return r.ints(min, (max + 1)).findFirst().getAsInt();
+    }
+    
+    public boolean hasBasementKey()
+    {
+        for (Item item:inventory)
+        {  if(item.getName().contains("key"))
+            {return true;}
+        }
+        
+        return false;
+    }
+    
+    public boolean hasWinningCondition()
+    {   
+        int numberOfCaskets =0;
+        
+        for (Item item:inventory)
+        {  if(item.getName().contains("charm"))
+            {return true;}
+           if(item.getIsCasket())
+           {numberOfCaskets+=1;}
+        }
+        
+        if(numberOfCaskets==3)
+        {
+            return true;
+        }
+        else{
+        return false;}
+    }
+    
+    public int getScore()
+    {
+        return score;
+    }
+    
+    public boolean leave(Command command)
+    {   if(command.hasSecondWord()) {
+            System.out.println("Leave what?");
+            return false;
+        };
+        System.out.printf("%nYou decide it's time to leave this wicked house%n%n");
+        gameCompleted = true;
+        return true;
     }
 }

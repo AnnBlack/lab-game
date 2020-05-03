@@ -1,6 +1,6 @@
 #BlueJ class context
 comment0.target=Game
-comment0.text=\r\n\ \ Insert\ game\ description\ here\r\n
+comment0.text=\r\n\ \ The\ Inheritance\ Problem\ \r\n
 comment1.params=
 comment1.target=Game()
 comment1.text=\r\n\ Create\ the\ Game\ and\ initialise\ its\ internal\ map.\r\n
@@ -9,8 +9,10 @@ comment2.target=void\ initialize()
 comment2.text=\r\n\ Create\ all\ the\ rooms,\ items\ and\ player.\r\n
 comment3.params=
 comment3.target=void\ play()
-comment3.text=\r\n\ \ Main\ play\ routine.\ \ Loops\ until\ end\ of\ play.\r\n
+comment3.text=\r\n\ \ Main\ play\ routine.\ \r\n
 comment4.params=
 comment4.target=void\ printWelcome()
 comment4.text=\r\n\ Print\ out\ the\ opening\ message\ for\ the\ Game.\r\n
-numComments=5
+comment5.params=
+comment5.target=void\ printEnding()
+numComments=6

@@ -1,36 +1,33 @@
 import java.util.Set;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Class Room - a room in an adventure game.
- *
- * This class is part of the "World of Zuul" application. 
- * "World of Zuul" is a very simple, text based adventure game.  
  *
  * A "Room" represents one location in the scenery of the game.  It is 
  * connected to other rooms via exits.  For each existing exit, the room 
  * stores a reference to the neighboring room.
  * 
- * @author  Michael Kölling and David J. Barnes
- * @version 2016.02.29
  */
 
 public class Room 
 {
-    private String description;
+    private String description, shortDescription;
+    private String name;
     private HashMap<String, Room> exits; // stores exits of this room.
     private ArrayList<Item> items;
 
     /**
-     * Create a room described "description". Initially, it has
-     * no exits. "description" is something like "a kitchen" or
-     * "an open court yard".
+     * Create a room described "description".
      * @param description The room's description.
      */
-    public Room(String description) 
-    {
-        this.description = description;
+    public Room(String name, String description, String shortDescription) 
+    {   
+        this.name = name;
+        this.description = String.format(description);
+        this.shortDescription = String.format(shortDescription);
         exits = new HashMap<>();
         items = new ArrayList<>();
     }
@@ -45,31 +42,36 @@ public class Room
         exits.put(direction, neighbor);
     }
     
+    public String getName()
+    {
+        return name;
+    }
+    
     public void setItem(Item item) 
     {
         items.add(item);
     }
-
+    
     /**
-     * @return The short description of the room
-     * (the one that was defined in the constructor).
-     */
-    public String getDescription()
-    {
-        return description;
-    }
-
-    /**
-     * Return a description of the room in the form:
-     *     You are in the kitchen.
-     *     Exits: north west
-     * @return A long description of this room
+     * Print first part of description of the room 
      */
     public void printDescription()
     {
-        System.out.printf("%n %s %n",description);
+        if(description.contains("<currentTime>"))
+        { Date time = new Date();
+          System.out.printf(description.replace("<currentTime>", "%tR") + "%n",time);
+        }
+        else{
+        System.out.printf("%s %n",description);}
     }
-
+    /**
+     * Print short description of the room 
+     */
+    public void printShortDescription()
+    {
+        System.out.printf("%s %n",shortDescription);
+    }
+    
     /**
      * Return a string describing the room's exits, for example
      * "Exits: north west".
@@ -95,18 +97,29 @@ public class Room
     {
         return exits.get(direction);
     }
-    public Item extractItem(String itemName) 
+    
+    public ArrayList<Item> getItems() 
+    {
+        return items;
+    }
+    
+    public Item getItem(String itemName) 
     {   
-        for (Item item : items) {
-        if (item.getName().contains(itemName)) {
-            
-            items.remove(item);
-            System.out.println("found " +item.getName());
+        for (Item item : items) 
+        {
+            if (item.getName().contains(itemName)) 
+            {
+            //System.out.println("found " +item.getName());
             return item;
-        }
+            }
         
+        }
+        return null;
     }
-    return null;
+    public void removeItem(Item item) 
+    {   
+            items.remove(item);
     }
+    
 }
 

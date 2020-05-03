@@ -17,7 +17,7 @@ public class Item
     public Item(String name, String description, int score, int weight, boolean isCasket) 
     {
         this.name = name;
-        this.description = description;
+        this.description = String.format(description);
         this.score = score;
         this.weight = weight;
         this.isCasket = isCasket;
@@ -33,6 +33,14 @@ public class Item
     {
         return name;
     }
+    public int getScore()
+    {
+        return score;
+    }
+    public int getWeight()
+    {
+        return weight;
+    }
     public boolean getIsCasket()
     {
         return isCasket;
@@ -40,5 +48,9 @@ public class Item
     public Item getContainedItem()
     {   
         return null;
+    }
+    public void printDescription()
+    {
+        System.out.printf("%n%s %n",description);
     }
 }
