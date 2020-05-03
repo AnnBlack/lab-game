@@ -1,6 +1,5 @@
-
 /**
- * Write a description of class Item here.
+ * Item is the main class for collectable things of the game.
  *
  */
 public class Item

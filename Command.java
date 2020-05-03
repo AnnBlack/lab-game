@@ -19,8 +19,7 @@ public class Command
     /**
      * Create a command object. First and second word must be supplied, but
      * either one (or both) can be null.
-     * @param firstWord The first word of the command. Null if the command
-     *                  was not recognised.
+     * @param firstWord The first word of the command. Null if the command was not recognised.
      * @param secondWord The second word of the command.
      */
     public Command(String firstWord, String secondWord)

@@ -1,6 +1,5 @@
-
 /**
- * Write a description of class Casket here inherited from Item.
+ * Сlass Casket is inherited from its main Item class.
  */
 public class Casket extends Item
 {
@@ -8,7 +7,7 @@ public class Casket extends Item
     
     public Casket(String name, String description, int score, int weight, boolean isCasket, Item containedItem)
     {   
-        super(name,description,score,weight,isCasket);
+        super(name, description, score, weight, isCasket);
         this.containedItem = containedItem;
     }
     

@@ -4,8 +4,7 @@
 
 public class Game 
 {
-    private Player player;
-    
+    public Player player;
     /**
      * Create the Game and initialise its internal map.
      */
@@ -13,7 +12,22 @@ public class Game
     {
         initialize();
     }
-
+    
+    /**
+    *  Main play routine. 
+    */
+    public void startGame()
+    {   
+        printWelcome();
+        boolean isGameCompleted = player.play();      
+        
+        if(isGameCompleted) {
+            printEndingWithScore();
+        } else {
+            System.out.println("Thank you for playing. We hope you actually finish the game next time!");
+        }
+    }
+    
     /**
      * Create all the rooms, items and player.
      */
@@ -109,19 +123,6 @@ public class Game
     }
 
     /**
-     *  Main play routine. 
-     */
-    public void play() 
-    {   
-        printWelcome();
-        boolean gameCompleted = player.play();
-        if(gameCompleted)
-        {printEnding();}
-        else
-        {System.out.println("Thank you for playing. We hope you actually finish the game next time!");}
-    }
-
-    /**
      * Print out the opening message for the Game.
      */
     private void printWelcome()
@@ -133,27 +134,22 @@ public class Game
         
     }
     
-    private void printEnding()
+    private void printEndingWithScore()
     {
-        if(player.hasWinningCondition())
-        {   
+        if(player.hasWinningCondition()) {   
             System.out.println("You found what you were looking for.");
-            if(player.getScore()>2000)          //the best ending
-               {
+            if(player.getScore() > 2000) {         //the best ending
                 System.out.println("You also gathered enough resources to be able to unveil");
                 System.out.println("the mysteries of the strange house and with the power granted");
                 System.out.println("by your aunt's charm, you know you will succeed.");
-                }
-               else                             //an OK ending
-               {System.out.println("You made it home in one peace.");
+              } else {                            //an OK ending
+                System.out.println("You made it home in one peace.");
                 System.out.println("A few days later, you survived an attempted murder by sheer luck.");
                 System.out.println("You have every reason to believe that it was your aunt's charm that kept you safe");
-                }
-        }
-        else
-        {                                       //*Astronomia by Vicetone intensifies*
-            {System.out.println("You couldn't find what you were looking for.") ;
-             System.out.println("Unfortunately, a few days later you die under mysterious circumstances");}
+            }
+        } else {                                   //*Astronomia by Vicetone intensifies*
+            System.out.println("You couldn't find what you were looking for.");
+            System.out.println("Unfortunately, a few days later you die under mysterious circumstances");
         }
     }
 }

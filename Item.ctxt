@@ -1,12 +1,12 @@
 #BlueJ class context
 comment0.target=Item
-comment0.text=\r\n\ Write\ a\ description\ of\ class\ Item\ here.\r\n\r\n
+comment0.text=\n\ Item\ is\ the\ main\ class\ for\ collectable\ things\ of\ the\ game.\n\n
 comment1.params=name\ description\ score\ weight\ isCasket
 comment1.target=Item(java.lang.String,\ java.lang.String,\ int,\ int,\ boolean)
-comment1.text=\r\n\ Constructor\ for\ objects\ of\ class\ Item\r\n
+comment1.text=\n\ Constructor\ for\ objects\ of\ class\ Item\n
 comment2.params=
 comment2.target=java.lang.String\ getShortDescription()
-comment2.text=\r\n\ methods\:\r\n
+comment2.text=\n\ methods\:\n
 comment3.params=
 comment3.target=java.lang.String\ getName()
 comment4.params=

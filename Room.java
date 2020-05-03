@@ -57,12 +57,12 @@ public class Room
      */
     public void printDescription()
     {
-        if(description.contains("<currentTime>"))
-        { Date time = new Date();
-          System.out.printf(description.replace("<currentTime>", "%tR") + "%n",time);
+        if(description.contains("<currentTime>")){ 
+            Date time = new Date();
+            System.out.printf(description.replace("<currentTime>", "%tR") + "%n",time);
+        } else {
+            System.out.printf("%s %n",description);
         }
-        else{
-        System.out.printf("%s %n",description);}
     }
     /**
      * Print short description of the room 
@@ -81,7 +81,7 @@ public class Room
     {
         String returnString = "Exits:";
         Set<String> keys = exits.keySet();
-        for(String exit : keys) {
+        for(String exit : keys){
             returnString += " " + exit;
         }
         return returnString;
@@ -105,14 +105,10 @@ public class Room
     
     public Item getItem(String itemName) 
     {   
-        for (Item item : items) 
-        {
-            if (item.getName().contains(itemName)) 
-            {
-            //System.out.println("found " +item.getName());
-            return item;
-            }
-        
+        for(Item item : items){
+           if (item.getName().contains(itemName)){
+               return item;
+           }
         }
         return null;
     }

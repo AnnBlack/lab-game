@@ -1,21 +1,8 @@
-/**
- * 
- */
-
-public class CommandWords
-{
+public class CommandWords {
     // a constant array that holds all valid command words
     private static final String[] validCommands = {
         "go", "quit", "help", "take", "drop", "inspect","leave"
     };
-
-    /**
-     * Constructor - initialise the command words.
-     */
-    public CommandWords()
-    {
-        // nothing to do at the moment...
-    }
 
     /**
      * Check whether a given String is a valid command word. 
