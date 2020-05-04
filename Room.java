@@ -59,11 +59,12 @@ public class Room
     {
         if(description.contains("<currentTime>")){ 
             Date time = new Date();
-            System.out.printf(description.replace("<currentTime>", "%tR") + "%n",time);
+            System.out.printf(description.replace("<currentTime>", "%tR") + "%n", time);
         } else {
             System.out.printf("%s %n",description);
         }
     }
+    
     /**
      * Print short description of the room 
      */
@@ -71,12 +72,7 @@ public class Room
     {
         System.out.printf("%s %n",shortDescription);
     }
-    
-    /**
-     * Return a string describing the room's exits, for example
-     * "Exits: north west".
-     * @return Details of the room's exits.
-     */
+
     private String getExitString()
     {
         String returnString = "Exits:";
@@ -87,12 +83,6 @@ public class Room
         return returnString;
     }
 
-    /**
-     * Return the room that is reached if we go from this room in direction
-     * "direction". If there is no room in that direction, return null.
-     * @param direction The exit's direction.
-     * @return The room in the given direction.
-     */
     public Room getExit(String direction) 
     {
         return exits.get(direction);
@@ -112,10 +102,10 @@ public class Room
         }
         return null;
     }
+    
     public void removeItem(Item item) 
     {   
-            items.remove(item);
+        items.remove(item);
     }
-    
 }
 

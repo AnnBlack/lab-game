@@ -51,27 +51,26 @@ public class Player {
         }
         
         String commandWord = command.getCommandWord();
-        
-        if (commandWord.equals("help")) {
-            printHelp();
-        }
-        else if (commandWord.equals("go")) {
-            goToRoom(command);
-        }
-        else if (commandWord.equals("take")) {
-           pickUp(command);
-        }
-        else if (commandWord.equals("drop")) {
-           drop(command);
-        }
-        else if (commandWord.equals("inspect")) {
-           inspect(command);
-        }
-        else if (commandWord.equals("leave")) {
-           wantToQuit = leave(command);
-        }
-        else if (commandWord.equals("quit")) {
-            wantToQuit = quit(command);
+        switch(commandWord) {
+            case "help":
+                printHelp();
+                break;
+            case "go":
+                goToRoom(command);
+                break;
+            case "take":
+                pickUp(command);
+                break;
+            case "drop":
+                drop(command);
+                break;
+            case "inspect":
+                inspect(command);
+                break;
+            case "leave":
+                return wantToQuit = leave(command);
+            case "quit":
+                return wantToQuit = quit(command);
         }
         
         // else command not recognised.
@@ -109,12 +108,10 @@ public class Player {
             System.out.println("Go where?");
             return;
         }
-    
         String direction = command.getSecondWord();
     
         // Try to leave current room.
         Room nextRoom = currentRoom.getExit(direction);
-    
         if (nextRoom == null){
             System.out.println("There is no door!");
         } else if((nextRoom.getName().contains("basement"))&&(!hasBasementKey())) {
@@ -123,8 +120,8 @@ public class Player {
             nextRoom.printShortDescription(); 
         } else {
             currentRoom = nextRoom;
-            currentRoom.printDescription();//printing 1st part of description
-            currentRoom.printShortDescription();//printing 2nd part of description
+            currentRoom.printDescription(); //printing 1st part of description
+            currentRoom.printShortDescription(); //printing 2nd part of description
         }
     }
 
@@ -237,16 +234,14 @@ public class Player {
         
         String itemName = command.getSecondWord();
         
-        for (Item item : inventory) 
-        {
-            if (item.getName().contains(itemName)) 
-            {
-            currentRoom.setItem(item);
-            inventory.remove(item);
-            score-=item.getScore();
-            weight-=item.getWeight();
-            System.out.println("You drop the " +item.getName() + " on the floor");
-            return;
+        for (Item item : inventory) {
+            if (item.getName().contains(itemName)) {
+                currentRoom.setItem(item);
+                inventory.remove(item);
+                score -= item.getScore();
+                weight -= item.getWeight();
+                System.out.println("You drop the " + item.getName() + " on the floor");
+                return;
             }
         };
         System.out.println("You don't have it!");
@@ -337,7 +332,7 @@ public class Player {
     }
    
     
-        /** 
+    /** 
      * the method resposible for the logical hacking quiz
      */
     public boolean hack(int guessCode, int trueCode)

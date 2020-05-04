@@ -1,5 +1,5 @@
 /**
- *  The Inheritance Problem 
+ *  The Game: The Inheritance Problem 
  */
 
 public class Game 
@@ -21,8 +21,8 @@ public class Game
         printWelcome();
         boolean isGameCompleted = player.play();      
         
-        if(isGameCompleted) {
-            printEndingWithScore();
+        if(isGameCompleted){
+            printEnding();
         } else {
             System.out.println("Thank you for playing. We hope you actually finish the game next time!");
         }
@@ -134,7 +134,7 @@ public class Game
         
     }
     
-    private void printEndingWithScore()
+    private void printEnding()
     {
         if(player.hasWinningCondition()) {   
             System.out.println("You found what you were looking for.");
