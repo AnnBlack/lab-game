@@ -1,33 +1,47 @@
+import java.util.ArrayList;
 
-/**
- * Write a description of class PlayerState here.
- *
- * @author (your name)
- * @version (a version number or a date)
- */
 public class PlayerState
 {
-    // instance variables - replace the example below with your own
-    private int x;
-
+    /*private Room currentRoom;
+    private Room previousRoom; // 1
+    private ArrayList<Item> inventory;
+    private ArrayList<Item> previousInventory; // 2
+    private int score = 0;
+    private int previousScore = 0; // 3
+    private int weight = 0;
+    private int previousWeight = 0; // 4
+    */
+    
+    private ArrayList<Player> stateTrackList;
+    
     /**
      * Constructor for objects of class PlayerState
      */
     public PlayerState()
     {
         // initialise instance variables
-        x = 0;
+        this.stateTrackList = new ArrayList<>();
     }
-
-    /**
-     * An example of a method - replace this comment with your own
-     *
-     * @param  y  a sample parameter for a method
-     * @return    the sum of x and y
-     */
-    public int sampleMethod(int y)
+    
+    public void setPlayerState(Player player)
     {
-        // put your code here
-        return x + y;
+        stateTrackList.add(player);
+    }
+    
+    public Player getPlayerState(int step)
+    {
+        /*for(int i = 0; i < stateTrackList.size(); i++) {
+            return stateTrackList.get(i);
+        } */
+        System.out.println("step: " + step);
+        return stateTrackList.get(step - 1);
+        //return null;
+    }
+    
+    private void printScoreState() 
+    {
+        for(int i = 0; i < stateTrackList.size(); i++) {
+            System.out.println(stateTrackList.get(i).score);
+        }
     }
 }

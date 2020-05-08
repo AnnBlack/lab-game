@@ -6,89 +6,62 @@ import java.io.*;
 
 public class Player implements java.io.Serializable
 {
+    public Room currentRoom;
+    public ArrayList<Item> inventory;
+    public int score;
+    public int weight;
     
-    private Room currentRoom;
-    private Room previousRoom; // 1
-    private ArrayList<Item> inventory;
-    private String previousPickedItem; // 2
-    private final int maxCapacity = 430;
-    private int score = 0;
+    public Room previousRoom; //1
+    private ArrayList<Item> previousInventory; // 2
     private int previousScore = 0; // 3
-    private int weight = 0;
     private int previousWeight = 0; // 4
     
+    private final int maxCapacity = 430;
     
     /**
      * Constructor for objects of class Player
      */
-    public Player(int maxCapacity, Room currentRoom)
+    public Player(Room currentRoom)
     {
         this.currentRoom = currentRoom;
-        this.previousRoom = null;
         this.inventory = new ArrayList<>();
-        this.previousPickedItem = null;
+        this.score = 0;
+        this.weight = 0;
         
-    }
-    
-    private void writeState()
-    {
-        
-      try {
-        if(currentRoom.getName() != null && previousRoom.getName() != null) {
-          saveToFile(currentRoom.getName(), previousRoom.getName(), score, previousScore, weight, previousWeight);
-        }
-      } catch (IOException ioException) {
-          System.err.println("Error writing file.");
-          ioException.printStackTrace();
-      }  
-    }
-    
-    private void saveToFile(String currentRoom, String previousRoom, int score, int previousScore, int weight, int previousWeight) throws IOException
-    {
-        ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("temp.tmp"));
-        List<Object> tempState = new ArrayList<Object>();
-        
-        tempState.add(inventory);
-        tempState.add(currentRoom);
-        tempState.add(previousRoom);
-        tempState.add(score);
-        tempState.add(previousScore);
-        tempState.add(weight);
-        tempState.add(previousWeight);
-        
-        os.writeObject(tempState);
-        //readSavedObject();
-        os.close();
-    }
-    
-    private Object readSavedObject()
-    {
-        try (
-            ObjectInputStream objectInput
-                = new ObjectInputStream(new FileInputStream("temp.tmp"));
-        ){
-     
-        while (true) {
-            System.out.print(objectInput.readObject() + "\t");
-            return objectInput.readObject();
-        }
-       
-        } catch (EOFException eof) {
-            System.out.println("Reached end of file");
-        } catch (IOException | ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-    
-    public void back()
-    {
-        Object tempPlayerState = new Object();
-        currentRoom = previousRoom;
-        tempPlayerState = readSavedObject();
-        System.out.print("hello " + tempPlayerState);
+        this.previousRoom = currentRoom;
+        this.previousInventory = inventory;
+        this.previousScore = score;
+        this.previousWeight = weight;
     }
 
+    public void back(int step, PlayerState state)
+    {
+        if(step >= 1) {
+            Player playerPrevState = state.getPlayerState(step);
+            
+            currentRoom = playerPrevState.previousRoom;
+            previousRoom = playerPrevState.previousRoom;
+            inventory = playerPrevState.previousInventory;
+            previousInventory = playerPrevState.previousInventory;
+            score = playerPrevState.previousScore;
+            weight = playerPrevState.previousScore;
+            previousScore = playerPrevState.previousScore;
+            previousScore = playerPrevState.previousScore;
+
+            System.out.println(score);
+            System.out.println("Now you're in: " + currentRoom.getName());
+            System.out.printf("your inventory now: %d/%d%n%n", weight, maxCapacity);
+            printInventory();
+        } else {
+            System.out.println("There is no way back..");
+        }
+
+        // drop previous inventory item
+        // reduce score
+        // go to previous room
+        // reduce weight
+    }
+    
     /** 
      * Try to go in to one direction. If there is an exit, enter the new
      * room, otherwise print an error message.
@@ -126,30 +99,13 @@ public class Player implements java.io.Serializable
         }
     }
 
-    public void inspect(Command command) 
-    {
-        if(command.hasSecondWord()) {
-            String itemName = command.getSecondWord();
-            boolean searching = true;
-            for (Item item : currentRoom.getItems()) {
-                if (item.getName().contains(itemName)) {
-                    item.printDescription();
-                    searching = false;
-                }
-            }
-            if(searching) {   
-                System.out.printf("%nYou don't see it anywhere in the room.%n");
-            }
-        } else {
-            currentRoom.printShortDescription();  //only print second part of description
-        }
-    }
-
     /**
      * pick Up an item
      */
     public void pickUp(Command command)
     {
+        ArrayList<Item> prevInventory = inventory;
+        
         if(!command.hasSecondWord()) {
             // if there is no second word, we don't know where to go...
             System.out.println("Take what?");
@@ -176,16 +132,21 @@ public class Player implements java.io.Serializable
             }   
             if (weight + extractedItem.getWeight() <= maxCapacity) {
                 inventory.add(extractedItem);
-                previousPickedItem = extractedItem.getName();
+                previousInventory = prevInventory;
+                
                 currentRoom.removeItem(extractedItem);
+                
+                previousScore = score;
+                previousWeight = weight;
+                
                 score += extractedItem.getScore();
                 weight += extractedItem.getWeight();
-                //writeState(extractedItem.getName(), score, weight);
+                
                 System.out.println("you put the " + extractedItem.getName() + " inside your bag");
                 System.out.println();
                 System.out.printf("your inventory now: %d/%d%n%n", weight,maxCapacity);
                 printInventory();
-            } else if (extractedItem.getWeight()>500) {
+            } else if (extractedItem.getWeight() > 500) {
                 System.out.println("Did you really think you could somehow fit that in your bag?");
             } else {
                 System.out.println("Your inventory is full! Looks like you'll have to give some of that loot up");
@@ -195,6 +156,8 @@ public class Player implements java.io.Serializable
 
     public void drop(Command command)
     {
+        ArrayList<Item> prevInventory = inventory;
+        
         if(!command.hasSecondWord()) {
             // if there is no second word, we don't know where to go...
             System.out.println("Drop what?");
@@ -207,13 +170,18 @@ public class Player implements java.io.Serializable
             if (item.getName().contains(itemName)) {
                 currentRoom.setItem(item);
                 inventory.remove(item);
+                previousInventory = prevInventory;
+                
+                previousScore = score;
+                previousWeight = weight;
+                
                 score -= item.getScore();
                 weight -= item.getWeight();
-                //writeState(item.getName(), score, weight);
                 System.out.println("You drop the " + item.getName() + " on the floor");
                 return;
             }
         };
+        
         System.out.println("You don't have it!");
         return;
     }
@@ -234,6 +202,25 @@ public class Player implements java.io.Serializable
             System.out.println("for now. Your hacking tool is not perfect after all!");
         }
         return isOpened;
+    }
+    
+    public void inspect(Command command) 
+    {
+        if(command.hasSecondWord()) {
+            String itemName = command.getSecondWord();
+            boolean searching = true;
+            for (Item item : currentRoom.getItems()) {
+                if (item.getName().contains(itemName)) {
+                    item.printDescription();
+                    searching = false;
+                }
+            }
+            if(searching) {   
+                System.out.printf("%nYou don't see it anywhere in the room.%n");
+            }
+        } else {
+            currentRoom.printShortDescription();  //only print second part of description
+        }
     }
 
     public void printInventory()

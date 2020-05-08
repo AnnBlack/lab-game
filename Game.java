@@ -5,16 +5,19 @@
 public class Game
 {
     public Player player;
+    private PlayerState playerState;
     private Parser parser;
     private boolean isFinished = false;
-
+    private int stepNumber;
     /**
      * Create the Game and initialise its internal map.
      */
     public Game() 
     {
         initialize();
+        this.playerState = new PlayerState();
         this.parser = new Parser();
+        this.stepNumber = 0;
     }
     
     /**
@@ -39,7 +42,22 @@ public class Game
         isFinished = false;
     }
     
-        /**
+    private void increaseStepNumber()
+    {
+        this.stepNumber++;
+    }
+    
+    private void decreaseStepNumber()
+    {
+        this.stepNumber--;
+    }
+    
+    private int getStepNumber()
+    {
+        return stepNumber;
+    }
+    
+    /**
      * Given a command, process (that is: execute) the command.
      * @param command The command to be processed.
      * @return true If the command ends the Game, false otherwise.
@@ -56,22 +74,32 @@ public class Game
                 return wantToQuit;
                 
             case BACK:
-                player.back();
+                System.out.println("back number: " + getStepNumber());
+                player.back(getStepNumber(), playerState);
+                decreaseStepNumber();
+                break;
                 
             case HELP:
                 printHelp();
                 break;
                 
             case GO:
+                increaseStepNumber();
+                System.out.println("back number: " + getStepNumber());
                 player.goToRoom(command);
+                playerState.setPlayerState(player);
                 break;
                 
             case TAKE:
+                increaseStepNumber();
                 player.pickUp(command);
+                playerState.setPlayerState(player);
                 break;
                 
             case DROP:
+                increaseStepNumber();
                 player.drop(command);
+                playerState.setPlayerState(player);
                 break;
                 
             case INSPECT:
@@ -88,7 +116,8 @@ public class Game
         // else command not recognised.
         return wantToQuit;
     }
-        /** 
+    
+    /** 
     * finish the game and print the ending according to your score
     */
     private boolean leave(Command command)  //leave as in leave the house and finish the game
@@ -212,8 +241,7 @@ public class Game
         basement.setItem(basementPanel);
         basement.setItem(basementChest);
         
-        player = new Player(530, hall);  // start Game hall
-        
+        player = new Player(hall);  // start Game hall
     }
 
     /**

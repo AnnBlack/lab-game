@@ -70,7 +70,7 @@ public class Room
      */
     public void printShortDescription()
     {
-        System.out.printf("%s %n",shortDescription);
+        System.out.printf("%s %n", shortDescription);
     }
 
     private String getExitString()
