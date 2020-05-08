@@ -5,13 +5,16 @@
 public class Game
 {
     public Player player;
-    
+    private Parser parser;
+    private boolean isFinished = false;
+
     /**
      * Create the Game and initialise its internal map.
      */
     public Game() 
     {
         initialize();
+        this.parser = new Parser();
     }
     
     /**
@@ -20,12 +23,103 @@ public class Game
     public void startGame()
     {   
         printWelcome();
-        boolean isGameCompleted = player.play();      
-        if(isGameCompleted){
+        while (!isFinished) {
+            Command command = parser.getCommand();
+            isFinished = processCommand(command);
+        }
+        if(isFinished){
             printEnding();
         } else {
             System.out.println("Thank you for playing. We hope you actually finish the game next time!");
         }
+    }
+    
+    public void restartGame()
+    {
+        isFinished = false;
+    }
+    
+        /**
+     * Given a command, process (that is: execute) the command.
+     * @param command The command to be processed.
+     * @return true If the command ends the Game, false otherwise.
+    */
+    private boolean processCommand(Command command) 
+    {
+        boolean wantToQuit = false;
+        
+        CommandWord commandWord = command.getCommandWord();
+        
+        switch (commandWord) {
+            case UNKNOWN:
+                System.out.println("I don't know what you mean...");
+                return wantToQuit;
+                
+            case BACK:
+                player.back();
+                
+            case HELP:
+                printHelp();
+                break;
+                
+            case GO:
+                player.goToRoom(command);
+                break;
+                
+            case TAKE:
+                player.pickUp(command);
+                break;
+                
+            case DROP:
+                player.drop(command);
+                break;
+                
+            case INSPECT:
+                player.inspect(command);
+                break;
+                
+            case LEAVE:
+                return wantToQuit = leave(command);
+                
+            case QUIT:
+                return wantToQuit = player.quit(command);
+        }
+        
+        // else command not recognised.
+        return wantToQuit;
+    }
+        /** 
+    * finish the game and print the ending according to your score
+    */
+    private boolean leave(Command command)  //leave as in leave the house and finish the game
+    {   
+        if(command.hasSecondWord()) {
+            System.out.println("Leave what?");
+            return false;
+        };
+        System.out.printf("%nYou decide it's time to leave this wicked house%n%n");
+        isFinished = true;
+        return true;
+    }
+    
+    /**
+     * Print out some help information.
+     * Here we print some stupid, cryptic message and a list of the 
+     * command words.
+     */
+    private void printHelp() 
+    {   
+        System.out.println();
+        System.out.println("You say the magic word. Nothing happens at first, then");
+        System.out.println("a striking realization hits you: ");
+        System.out.println("You are on a mission of retrieving your inheritance");
+        System.out.println("in a creepy mansion full of all sorts of uncanny relics");
+        System.out.println("and ancient artifacts. A totally normal situation ");
+        System.out.println("to find yourself in.");
+        System.out.println();
+        System.out.println("All the next possible steps become very clear to you:");
+        
+        parser.showCommands();
     }
     
     /**

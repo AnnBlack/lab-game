@@ -14,12 +14,12 @@ public class HackingTool
     public HackingTool()
     {
         this.trueCode = getRandomNumberInRange(100,999);
-        System.out.println("the generated true code: " +trueCode + " here for testing");
+        System.out.println("the generated true code: " + trueCode + " here for testing");
     }
     
     public boolean hack()
     {
-        for (int i = 0; i<permittedAttempts; i++){
+        for (int i = 0; i < permittedAttempts; i++){
                 Scanner input = new Scanner(System.in);
                 int guessCode = input.nextInt();
                 if(tryGuess(guessCode)){
