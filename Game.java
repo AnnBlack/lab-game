@@ -26,6 +26,8 @@ public class Game
     public void startGame()
     {   
         printWelcome();
+        player.currentRoom.printDescription();
+        player.currentRoom.printShortDescription();
         while (!isFinished) {
             Command command = parser.getCommand();
             isFinished = processCommand(command);
@@ -74,7 +76,7 @@ public class Game
                 return wantToQuit;
                 
             case BACK:
-                System.out.println("back number: " + getStepNumber());
+                System.out.println("step: " + getStepNumber());
                 player.back(getStepNumber(), playerState);
                 decreaseStepNumber();
                 break;
@@ -85,7 +87,7 @@ public class Game
                 
             case GO:
                 increaseStepNumber();
-                System.out.println("back number: " + getStepNumber());
+                System.out.println("step: " + getStepNumber());
                 player.goToRoom(command);
                 playerState.setPlayerState(player);
                 break;

@@ -70,9 +70,6 @@ public class Player implements java.io.Serializable
     {
         String direction = command.getSecondWord();
         Room nextRoom = null;
-        
-        currentRoom.printDescription();
-        currentRoom.printShortDescription();
      
         if (command.hasSecondWord()) {
             if (direction.equals("back")){
@@ -87,6 +84,8 @@ public class Player implements java.io.Serializable
             } else if (nextRoom.getName().contains("bedroom")) {
                 nextRoom.printShortDescription(); 
             } else {
+                //currentRoom.printDescription();
+                //currentRoom.printShortDescription();
                 previousRoom = currentRoom;
                 currentRoom = nextRoom;
                 currentRoom.printDescription(); //printing 1st part of description
