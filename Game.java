@@ -1,10 +1,11 @@
 /**
- *  The Game: The Inheritance Problem 
+ * The Inheritance Problem: The Game
  */
 
-public class Game 
+public class Game
 {
     public Player player;
+    
     /**
      * Create the Game and initialise its internal map.
      */
@@ -20,7 +21,6 @@ public class Game
     {   
         printWelcome();
         boolean isGameCompleted = player.play();      
-        
         if(isGameCompleted){
             printEnding();
         } else {
@@ -40,13 +40,13 @@ public class Game
         Item studyTelescope, studyBoard, studyDesk;
         Casket diningRoomCasket, studyCasket, workshopBox, basementChest;
         
-        // create the rooms //разбить описание
-        hall = new Room("hall","%nYou stand in what seems to be a hall and a portrait-gallery combined, %nin a collector's apartment. Of all paintings that cover the walls, %nthe one that sticks out to you the most is the portrait of %nwho you assume is the owner of the house. You realize what's so unnerving %nabout the painting - the eyes seem to follow you no matter where you go.","%nYou look around.There is a staircase that leads to the second floor, %na door to your right and a door to your left.");
+        // create the rooms
+        hall = new Room("hall","%nYou stand in a hall of the collector's apartment. Of all paintings that %ndecorate the walls, the one that sticks out to you the most is the portrait of %nwho you assume is the owner of the house. You realize what's so unnerving %nabout the painting - the eyes seem to follow you wherever you go.","%nYou look around.There is a staircase that leads to the second floor, %na door to your right and a door to your left.");
         diningRoom = new Room("diningRoom","%nYou enter a dining room. The only thing that indicates it's a dining room %nis an ornate table set in the middle of it. A staggering amount of display cases with treasures, %ndecorative urns and reliquaries make it look like a museum more than anything else.","%nOne of the cabinets immediately catches your eye.%nThere is a small sword, a brooch in the form of a star and %na jewelry casket, all decorated with diamonds.");
         library = new Room("library","%nYou enter a room that is obviously a library, and quite an impressive one. %nYou cannot see the walls - it's all covered by the endless rows of bookshelves.","%nThere is a pile of books on a table in the right corner of the room, %none of them still open. You also notice another door next to it.");
         workshop = new Room("workshop","%nYou enter what you could best describe as a workshop, or a lab of some sort. %nStrange jars with liquids hanging from the ceiling, dozens of %nvial racks and the most peculiar looking workbenches %nmake you question whether it was worth coming here at all.","%nA big red-glowing vial on the desk captures you attention. Beside it lies %na fancy little box. You almost overlook a hatch on the floor, near %nwhat could be a distillation apparatus. You wonder where it leads.");
         secondFloor = new Room("secondFloor","%nYou come up the stairs and reach the second-floor hall. %nThe clock on the wall shows <currentTime>.","%nYou see two doors - one to your right and another one to your left.");
-        study = new Room("study","%nYou come into a room that could be a study, or a personal office.%nMuch like the previous one, it is full of unusual items of all sorts.","%nAside from ancient tablets and armillary spheres that are beyond your understanding,%nyou see a telescope looking through an open window, a drawing board and a desk next to it.%nYou approach the desk. Among various schematics and blueprints %nthere is another casket that you could try to unlock.");
+        study = new Room("study","%nYou walk into a room that could be a study, or a personal office.%nMuch like the previous one, it is full of unusual items of all sorts.","%nAside from ancient tablets and armillary spheres that are beyond your understanding,%nyou see a telescope looking through an open window, a drawing board and a desk next to it.%nYou approach the desk. Among various schematics and blueprints %nthere is another casket that you could try to unlock.");
         basement = new Room("basement", "You come down into the basement. Just when you thought it couldn't get any more %ndisturbing, what lies before you makes want to flee away from this wicked house. %nHowever, you find a way to curb your fear, and proceed further %ninto what looks like a chamber for some twisted experiments. ","%nIn the middle of the room you see a sarcophagus, surrounded by %nclanking machines with cogs and gears. You also notice a small ornate chest, %nnext to some sort of a control panel");
         bedroom = new Room("bedroom","none","%nJust as you reach for the doorknob you hear a clicking sound coming %nfrom the inside. You lean forward and peek through the keyhole. You are %nsurprised to see a totally normal looking room. There is a lone person sitting in front of a %ncomputer screen; luckily, too carried away to notice anything. You decide that %nit would be wise, not to disclose your presence and carefully step back.");
         
@@ -138,8 +138,8 @@ public class Game
     {
         if(player.hasWinningCondition()) {   
             System.out.println("You found what you were looking for.");
-            if(player.getScore() > 2000) {         //the best ending
-                System.out.println("You also gathered enough resources to be able to unveil");
+            if(player.getScore() > 2000) {        //the best ending
+                System.out.println("You also gathered enough resources to try to unveil");
                 System.out.println("the mysteries of the strange house and with the power granted");
                 System.out.println("by your aunt's charm, you know you will succeed.");
               } else {                            //an OK ending
@@ -147,7 +147,7 @@ public class Game
                 System.out.println("A few days later, you survived an attempted murder by sheer luck.");
                 System.out.println("You have every reason to believe that it was your aunt's charm that kept you safe");
             }
-        } else {                                   //*Astronomia by Vicetone intensifies*
+        } else {                                   //RIP
             System.out.println("You couldn't find what you were looking for.");
             System.out.println("Unfortunately, a few days later you die under mysterious circumstances");
         }

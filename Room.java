@@ -108,4 +108,3 @@ public class Room
         items.remove(item);
     }
 }
-

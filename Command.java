@@ -5,15 +5,15 @@
  * 
  * The way this is used is: Commands are already checked for being valid
  * command words. If the user entered an invalid command (a word that is not
- * known) then the command word is <null>.
+ * known) then the command word is UNKNOWN.
  *
- * If the command had only one word, then the second word is <null>.
+ * If the command had only one word, then the second word is UNKNOWN.
  * 
  */
 
 public class Command
 {
-    private String commandWord;
+    private CommandWord commandWord;
     private String secondWord;
 
     /**
@@ -22,9 +22,9 @@ public class Command
      * @param firstWord The first word of the command. Null if the command was not recognised.
      * @param secondWord The second word of the command.
      */
-    public Command(String firstWord, String secondWord)
+    public Command(CommandWord commandWord, String secondWord)
     {
-        commandWord = firstWord;
+        this.commandWord = commandWord;
         this.secondWord = secondWord;
     }
 
@@ -33,7 +33,7 @@ public class Command
      * command was not understood, the result is null.
      * @return The command word.
      */
-    public String getCommandWord()
+    public CommandWord getCommandWord()
     {
         return commandWord;
     }
@@ -52,7 +52,7 @@ public class Command
      */
     public boolean isUnknown()
     {
-        return (commandWord == null);
+        return (commandWord == CommandWord.UNKNOWN);
     }
 
     /**

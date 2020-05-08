@@ -1,6 +1,6 @@
 #BlueJ class context
 comment0.target=Game
-comment0.text=\n\ \ The\ Game\:\ The\ Inheritance\ Problem\ \n
+comment0.text=\n\ The\ Inheritance\ Problem\:\ The\ Game\n
 comment1.params=
 comment1.target=Game()
 comment1.text=\n\ Create\ the\ Game\ and\ initialise\ its\ internal\ map.\n

@@ -1,16 +1,21 @@
-import java.util.Set;
+import java.util.*;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.Scanner;
+import java.io.*;
 
-public class Player {
+public class Player implements java.io.Serializable
+{
     private Parser parser;
     private Room currentRoom;
+    private Room previousRoom; // 1
     private ArrayList<Item> inventory;
+    private ArrayList<Item> previousInventory; // 2
     private final int maxCapacity = 430;
     private int score = 0;
+    private int previousScore = 0; // 3
     private int weight = 0;
+    private int previousWeight = 0; // 4
     private boolean isGameCompleted = false;
     
     /**
@@ -19,7 +24,9 @@ public class Player {
     public Player(int maxCapacity, Room currentRoom)
     {
         inventory = new ArrayList<>();
+        previousInventory = null;
         this.currentRoom = currentRoom;
+        this.previousRoom = null;
         parser = new Parser();
     }
 
@@ -29,6 +36,7 @@ public class Player {
         boolean finished = false;
         currentRoom.printDescription();
         currentRoom.printShortDescription();
+        // main player's loop
         while (!finished) {
             Command command = parser.getCommand();
             finished = processCommand(command);
@@ -36,40 +44,101 @@ public class Player {
         return isGameCompleted;
     }
     
+    private void writeState(String inventory, int score, int weight)
+    {
+      try {
+          saveToFile(inventory, score, weight);
+      } catch (IOException ioException) {
+          System.err.println("Error writing file.");
+          ioException.printStackTrace();
+      }  
+    }
+    
+    private void saveToFile(String inventory, int score, int weight) throws IOException
+    {
+        ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("temp.tmp"));
+        List<Object> tempState = new ArrayList<Object>();
+
+        tempState.add(inventory);
+        tempState.add(score);
+        tempState.add(weight);
+        
+        os.writeObject(tempState);
+        readSavedObject();
+        os.close();
+    }
+    
+    private Object readSavedObject()
+    {
+        try (
+            ObjectInputStream objectInput
+                = new ObjectInputStream(new FileInputStream("temp.tmp"));
+        ){
+     
+        while (true) {
+            System.out.print(objectInput.readObject() + "\t");
+            return objectInput.readObject();
+        }
+       
+        } catch (EOFException eof) {
+            System.out.println("Reached end of file");
+        } catch (IOException | ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    
+    private void back()
+    {
+        Object tempPlayerState = new Object();
+        currentRoom = previousRoom;
+        tempPlayerState = readSavedObject();
+        System.out.print("hello " + tempPlayerState);
+    }
+    
     /**
      * Given a command, process (that is: execute) the command.
      * @param command The command to be processed.
      * @return true If the command ends the Game, false otherwise.
     */
-    public boolean processCommand(Command command) 
+    private boolean processCommand(Command command) 
     {
         boolean wantToQuit = false;
         
-        if(command.isUnknown()) {
-            System.out.println("I don't know what you mean...");
-            return wantToQuit;
-        }
+        CommandWord commandWord = command.getCommandWord();
         
-        String commandWord = command.getCommandWord();
-        switch(commandWord) {
-            case "help":
+        switch (commandWord) {
+            case UNKNOWN:
+                System.out.println("I don't know what you mean...");
+                return wantToQuit;
+                
+            case BACK:
+                back();
+                
+            case HELP:
                 printHelp();
                 break;
-            case "go":
+                
+            case GO:
                 goToRoom(command);
                 break;
-            case "take":
+                
+            case TAKE:
                 pickUp(command);
                 break;
-            case "drop":
+                
+            case DROP:
                 drop(command);
                 break;
-            case "inspect":
+                
+            case INSPECT:
                 inspect(command);
                 break;
-            case "leave":
+                
+            case LEAVE:
                 return wantToQuit = leave(command);
-            case "quit":
+                
+            case QUIT:
                 return wantToQuit = quit(command);
         }
         
@@ -101,58 +170,37 @@ public class Player {
      * Try to go in to one direction. If there is an exit, enter the new
      * room, otherwise print an error message.
      */
-    public void goToRoom(Command command) 
+    private void goToRoom(Command command) 
     {
-        if(!command.hasSecondWord()) {
+        String direction = command.getSecondWord();
+        Room nextRoom = null;
+     
+        if (command.hasSecondWord()) {
+            if (direction.equals("back")){
+                nextRoom = previousRoom;
+            } else {    // Try to leave current room.
+                nextRoom = currentRoom.getExit(direction);
+            }
+            if (nextRoom == null){
+                System.out.println("There is no door!");
+            } else if ((nextRoom.getName().contains("basement"))&&(!hasBasementKey())) {
+                System.out.println("You don't have the key!"); 
+            } else if (nextRoom.getName().contains("bedroom")) {
+                nextRoom.printShortDescription(); 
+            } else {
+                previousRoom = currentRoom;
+                currentRoom = nextRoom;
+                currentRoom.printDescription(); //printing 1st part of description
+                currentRoom.printShortDescription(); //printing 2nd part of description
+            }
+        } else {
             // if there is no second word, we don't know where to go...
             System.out.println("Go where?");
             return;
         }
-        String direction = command.getSecondWord();
-    
-        // Try to leave current room.
-        Room nextRoom = currentRoom.getExit(direction);
-        if (nextRoom == null){
-            System.out.println("There is no door!");
-        } else if((nextRoom.getName().contains("basement"))&&(!hasBasementKey())) {
-            System.out.println("You don't have the key!"); 
-        } else if(nextRoom.getName().contains("bedroom")) {
-            nextRoom.printShortDescription(); 
-        } else {
-            currentRoom = nextRoom;
-            currentRoom.printDescription(); //printing 1st part of description
-            currentRoom.printShortDescription(); //printing 2nd part of description
-        }
     }
 
-    /** 
-     * "quit" was entered. Check the rest of the command to see
-     * whether we really quit the Game.
-     * @return true, if this command quits (exit) the Game, false otherwise.
-     */
-    public boolean quit(Command command) 
-    {
-        if(command.hasSecondWord()) {
-            System.out.println("Quit what?");
-            return false;
-        } else {
-            return true;  // signal that we want to exit
-        }
-    }
-    
-    // leave (finish) the game and score collected items
-    public boolean leave(Command command)
-    {   
-        if(command.hasSecondWord()) {
-            System.out.println("Leave what?");
-            return false;
-        };
-        System.out.printf("%nYou decide it's time to leave this wicked house%n%n");
-        isGameCompleted = true;
-        return true;
-    }
-
-    public void inspect(Command command) 
+    private void inspect(Command command) 
     {
         if(command.hasSecondWord()) {
             String itemName = command.getSecondWord();
@@ -172,9 +220,9 @@ public class Player {
     }
 
     /**
-     * pick Up
+     * pick Up an item
      */
-    public void pickUp(Command command)
+    private void pickUp(Command command)
     {
         if(!command.hasSecondWord()) {
             // if there is no second word, we don't know where to go...
@@ -184,47 +232,41 @@ public class Player {
         
         String itemName = command.getSecondWord();
         Item extractedItem;
-        
-        //System.out.println("looking for " +itemName);
-        if((extractedItem = currentRoom.getItem(itemName))==null)
-        {
+    
+        if((extractedItem = currentRoom.getItem(itemName)) == null) {
             System.out.println("You don't see it anywhere in the room");
             return;
-        }
-        else 
-        {
-            if(extractedItem.getIsCasket())//if the casket is found
-        {   
-            if(pickLock())
-            {   
+        } else {
+            //if the casket is found
+            if(extractedItem.getIsCasket()) { 
+                if(pickLock()){   
+                    currentRoom.removeItem(extractedItem);
+                    extractedItem = extractedItem.getContainedItem();    //otherwise we get endless amount of caskets
+                    currentRoom.setItem(extractedItem);
+                    System.out.printf("There is a " + extractedItem.getName() +" inside. %n");
+                    extractedItem.printDescription();
+                    System.out.println();
+                }
+            }   
+            if(weight + extractedItem.getWeight() <= maxCapacity) {
+                inventory.add(extractedItem);
                 currentRoom.removeItem(extractedItem);
-                extractedItem = extractedItem.getContainedItem();    //otherwise we get endless amount of caskets
-                currentRoom.setItem(extractedItem);
-                System.out.printf("There is a " + extractedItem.getName() +" inside. %n");
-                extractedItem.printDescription();
+                score += extractedItem.getScore();
+                weight += extractedItem.getWeight();
+                writeState(extractedItem.getName(), score, weight);
+                System.out.println("you put the " + extractedItem.getName() + " inside your bag");
                 System.out.println();
+                System.out.printf("your inventory now: %d/%d%n%n", weight,maxCapacity);
+                printInventory();
+            } else if(extractedItem.getWeight()>500) {
+                System.out.println("Did you really think you could somehow fit that in your bag?");
+            } else {
+                System.out.println("Your inventory is full! Looks like you'll have to give some of that loot up");
             }
-        }   
-            if(weight+extractedItem.getWeight()<=maxCapacity)
-            {
-            inventory.add(extractedItem);
-            currentRoom.removeItem(extractedItem);
-            score+=extractedItem.getScore();
-            weight+=extractedItem.getWeight();
-            System.out.println("you put the " +extractedItem.getName() + " inside your bag");
-            System.out.println();
-            System.out.printf("your inventory now: %d/%d%nscore: %d%n", weight,maxCapacity,score);
-            printInventory();
-            }
-            else if(extractedItem.getWeight()>500)
-            {System.out.println("Did you really think you could somehow fit that in your bag?");}
-            else
-            {System.out.println("Your inventory is full! Looks like you'll have to give some of that loot up");}
         }
-    
     }
 
-    public void drop(Command command)
+    private void drop(Command command)
     {
         if(!command.hasSecondWord()) {
             // if there is no second word, we don't know where to go...
@@ -240,6 +282,7 @@ public class Player {
                 inventory.remove(item);
                 score -= item.getScore();
                 weight -= item.getWeight();
+                writeState(item.getName(), score, weight);
                 System.out.println("You drop the " + item.getName() + " on the floor");
                 return;
             }
@@ -253,30 +296,16 @@ public class Player {
      * or until all the attempts are used (currently 5)
      */
     public boolean pickLock() 
-    {                         
-        boolean isOpened = false;
-        int trueCode = getRandomNumberInRange(100,999);
-        int permittedAttempts = 5;      
-        
+    {
+        HackingTool hackingTool = new HackingTool();
         System.out.printf("%nYou try to pick the lock with your hacking tool%n");
-        System.out.println("the generated true code: " +trueCode + " shouldn't be here in the final version ofc");
-        for (int i = 0; i<permittedAttempts; i++)
-            {
-                Scanner input = new Scanner(System.in);  //сканнер пока не проверяет френдли юзера
-                int guessCode = input.nextInt();
-                if(hack(guessCode, trueCode)) //может не разделять на пикап и хак методы? чтобы не пассить 
-                {                             //один и тот же труКод макс 5 раз
-                    isOpened = true;          //с другой стороны, мне кажется проще понять код если они разделены 
-                    System.out.println("You've managed to open the lock");
-                    break; 
-                }
-            }
-        if(!isOpened)
-            {
-                System.out.println("You hear the sound of the lock getting stuck and realize that");
-                System.out.println("after several attempts  it gets broken. You decide to leave it be");
-                System.out.println("for now. Your hacking tool is not perfect after all!");
-            }
+        boolean isOpened = hackingTool.hack();
+        
+        if(!isOpened) {
+            System.out.println("You hear the sound of the lock getting stuck and realize that");
+            System.out.println("after several attempts  it gets broken. You decide to leave it be");
+            System.out.println("for now. Your hacking tool is not perfect after all!");
+        }
         return isOpened;
     }
 
@@ -288,19 +317,7 @@ public class Player {
         System.out.println();
     }
 
-    public void printTable(int guessCode,int bulls, int cows)
-    {
-        System.out.printf("%nyour guess: %d%n•: %d%n-: %d%n", guessCode, bulls, cows);
-        
-    }
-
-    private static int getRandomNumberInRange(int min, int max) 
-    {
-        Random r = new Random();
-        return r.ints(min, (max + 1)).findFirst().getAsInt();
-    }
-
-    public boolean hasBasementKey()
+    private boolean hasBasementKey()
     {
         for (Item item : inventory) {  
             if(item.getName().contains("key")) {
@@ -326,43 +343,37 @@ public class Player {
         return numberOfCaskets == 3 ? true : false;
     }
     
+    /** 
+     * "quit" was entered. Check the rest of the command to see
+     * whether we really quit the Game.
+     * @return true, if this command quits (exit) the Game, false otherwise.
+     */
+    private boolean quit(Command command) 
+    {
+        if (command.hasSecondWord()) {
+            System.out.println("Quit what?");
+            return false;
+        } else {
+            return true;  // signal that we want to exit
+        }
+    }
+    
+    /** 
+    * finish the game and print the ending according to your score
+    */
+    private boolean leave(Command command)  //leave as in leave the house and finish the game
+    {   
+        if(command.hasSecondWord()) {
+            System.out.println("Leave what?");
+            return false;
+        };
+        System.out.printf("%nYou decide it's time to leave this wicked house%n%n");
+        isGameCompleted = true;
+        return true;
+    }
+    
     public int getScore()
     {
         return score;
-    }
-   
-    
-    /** 
-     * the method resposible for the logical hacking quiz
-     */
-    public boolean hack(int guessCode, int trueCode)
-    {   
-        boolean isHacked = false;
-        int bulls = 0;                //represent • and -
-        int cows=0;
-        
-        HashMap<String,Integer> bullsCows=new HashMap<String,Integer>();
-        String trueCodeString = Integer.toString(trueCode);
-        String guessCodeString = Integer.toString(guessCode);
-        for (int i = 0; i < trueCodeString.length(); i++){   
-            for (int j = 0; j < guessCodeString.length(); j++)
-            {   
-                if (trueCodeString.charAt(i) == guessCodeString.charAt(j)) {
-                    if(i==j){ bulls++; }
-                    else{cows++;}
-                }
-            }
-        }
-        
-        if(bulls == 3) {
-            isHacked = true;
-            return isHacked;
-        }
-        
-        bullsCows.put("•",bulls);
-        bullsCows.put("-",cows);
-        printTable(guessCode,bulls,cows);
-        
-        return isHacked;
     }
 }
