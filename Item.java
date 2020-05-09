@@ -10,7 +10,7 @@ public class Item implements Serializable
     private int score;
     private int weight;
     private String name;
-    boolean isCasket;
+    private boolean isCasket;
 
     /**
      * Constructor for objects of class Item
