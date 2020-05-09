@@ -4,8 +4,9 @@
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+import java.io.*;
 
-public class HackingTool
+public class HackingTool implements Serializable
 {
     // instance variables - replace the example below with your own
     private int trueCode;

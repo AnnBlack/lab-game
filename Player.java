@@ -4,18 +4,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.*;
 
-public class Player implements java.io.Serializable
+public class Player implements Serializable
 {
     public Room currentRoom;
     public ArrayList<Item> inventory;
     public int score;
     public int weight;
     
-    public Room previousRoom; //1
-    private ArrayList<Item> previousInventory; // 2
-    private int previousScore = 0; // 3
-    private int previousWeight = 0; // 4
-    
+    public Room previousRoom;
+    private boolean gameCompleted = false;
     private final int maxCapacity = 430;
     
     /**
@@ -29,37 +26,6 @@ public class Player implements java.io.Serializable
         this.weight = 0;
         
         this.previousRoom = currentRoom;
-        this.previousInventory = inventory;
-        this.previousScore = score;
-        this.previousWeight = weight;
-    }
-
-    public void back(int step, PlayerState state)
-    {
-        if(step >= 1) {
-            Player playerPrevState = state.getPlayerState(step);
-            
-            currentRoom = playerPrevState.previousRoom;
-            previousRoom = playerPrevState.previousRoom;
-            inventory = playerPrevState.previousInventory;
-            previousInventory = playerPrevState.previousInventory;
-            score = playerPrevState.previousScore;
-            weight = playerPrevState.previousScore;
-            previousScore = playerPrevState.previousScore;
-            previousScore = playerPrevState.previousScore;
-
-            System.out.println(score);
-            System.out.println("Now you're in: " + currentRoom.getName());
-            System.out.printf("your inventory now: %d/%d%n%n", weight, maxCapacity);
-            printInventory();
-        } else {
-            System.out.println("There is no way back..");
-        }
-
-        // drop previous inventory item
-        // reduce score
-        // go to previous room
-        // reduce weight
     }
     
     /** 
@@ -84,8 +50,6 @@ public class Player implements java.io.Serializable
             } else if (nextRoom.getName().contains("bedroom")) {
                 nextRoom.printShortDescription(); 
             } else {
-                //currentRoom.printDescription();
-                //currentRoom.printShortDescription();
                 previousRoom = currentRoom;
                 currentRoom = nextRoom;
                 currentRoom.printDescription(); //printing 1st part of description
@@ -131,12 +95,8 @@ public class Player implements java.io.Serializable
             }   
             if (weight + extractedItem.getWeight() <= maxCapacity) {
                 inventory.add(extractedItem);
-                previousInventory = prevInventory;
                 
                 currentRoom.removeItem(extractedItem);
-                
-                previousScore = score;
-                previousWeight = weight;
                 
                 score += extractedItem.getScore();
                 weight += extractedItem.getWeight();
@@ -169,10 +129,6 @@ public class Player implements java.io.Serializable
             if (item.getName().contains(itemName)) {
                 currentRoom.setItem(item);
                 inventory.remove(item);
-                previousInventory = prevInventory;
-                
-                previousScore = score;
-                previousWeight = weight;
                 
                 score -= item.getScore();
                 weight -= item.getWeight();
@@ -269,6 +225,22 @@ public class Player implements java.io.Serializable
         } else {
             return true;  // signal that we want to exit
         }
+    }
+    
+    public boolean leave(Command command)  //leave as in leave the house and finish the game
+    {   
+        if(command.hasSecondWord()) {
+            System.out.println("Leave what?");
+            return false;
+        };
+        System.out.printf("%nYou decide it's time to leave this wicked house%n%n");
+        gameCompleted = true;
+        return true;
+    }
+    
+    public boolean gameCompleted()
+    {
+        return gameCompleted;
     }
     
     public int getScore()

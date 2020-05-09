@@ -2,6 +2,7 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Date;
+import java.io.*;
 
 /**
  * Class Room - a room in an adventure game.
@@ -12,7 +13,7 @@ import java.util.Date;
  * 
  */
 
-public class Room 
+public class Room implements Serializable
 {
     private String description, shortDescription;
     private String name;
