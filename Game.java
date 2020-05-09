@@ -1,23 +1,23 @@
 /**
  * The Inheritance Problem: The Game
  */
+import java.util.ArrayList;
 
 public class Game
 {
     public Player player;
-    private PlayerState playerState;
     private Parser parser;
     private boolean isFinished = false;
-    private int stepNumber;
+    GameStateTracker stateTracker;
+    private ArrayList<Room> rooms;
+     
     /**
      * Create the Game and initialise its internal map.
      */
     public Game() 
     {
         initialize();
-        this.playerState = new PlayerState();
         this.parser = new Parser();
-        this.stepNumber = 0;
     }
     
     /**
@@ -26,37 +26,25 @@ public class Game
     public void startGame()
     {   
         printWelcome();
+        stateTracker = new GameStateTracker();
+        GameState currentStage = new GameState(player, rooms);
+        stateTracker.recordGameState(currentStage);
+        
         player.currentRoom.printDescription();
         player.currentRoom.printShortDescription();
+        
         while (!isFinished) {
             Command command = parser.getCommand();
             isFinished = processCommand(command);
+            currentStage.setPlayer(player);
+            currentStage.setRooms(rooms);
+            stateTracker.recordGameState(currentStage);
         }
-        if(isFinished){
+        if(player.gameCompleted()){
             printEnding();
         } else {
             System.out.println("Thank you for playing. We hope you actually finish the game next time!");
         }
-    }
-    
-    public void restartGame()
-    {
-        isFinished = false;
-    }
-    
-    private void increaseStepNumber()
-    {
-        this.stepNumber++;
-    }
-    
-    private void decreaseStepNumber()
-    {
-        this.stepNumber--;
-    }
-    
-    private int getStepNumber()
-    {
-        return stepNumber;
     }
     
     /**
@@ -76,9 +64,8 @@ public class Game
                 return wantToQuit;
                 
             case BACK:
-                System.out.println("step: " + getStepNumber());
-                player.back(getStepNumber(), playerState);
-                decreaseStepNumber();
+                System.out.println("You've decided to step back...");
+                reSet(stateTracker.getLastGameStage());
                 break;
                 
             case HELP:
@@ -86,22 +73,15 @@ public class Game
                 break;
                 
             case GO:
-                increaseStepNumber();
-                System.out.println("step: " + getStepNumber());
                 player.goToRoom(command);
-                playerState.setPlayerState(player);
                 break;
                 
             case TAKE:
-                increaseStepNumber();
                 player.pickUp(command);
-                playerState.setPlayerState(player);
                 break;
                 
             case DROP:
-                increaseStepNumber();
                 player.drop(command);
-                playerState.setPlayerState(player);
                 break;
                 
             case INSPECT:
@@ -109,7 +89,7 @@ public class Game
                 break;
                 
             case LEAVE:
-                return wantToQuit = leave(command);
+                return wantToQuit = player.leave(command);
                 
             case QUIT:
                 return wantToQuit = player.quit(command);
@@ -119,18 +99,9 @@ public class Game
         return wantToQuit;
     }
     
-    /** 
-    * finish the game and print the ending according to your score
-    */
-    private boolean leave(Command command)  //leave as in leave the house and finish the game
-    {   
-        if(command.hasSecondWord()) {
-            System.out.println("Leave what?");
-            return false;
-        };
-        System.out.printf("%nYou decide it's time to leave this wicked house%n%n");
-        isFinished = true;
-        return true;
+    public void restartGame()
+    {
+        this.isFinished = false;
     }
     
     /**
@@ -153,9 +124,20 @@ public class Game
         parser.showCommands();
     }
     
-    /**
-     * Create all the rooms, items and player.
-     */
+    private void reSet(GameState prevStage)
+    {   
+        if (prevStage != null) {
+            rooms = prevStage.getRooms();
+            player = prevStage.getPlayer();
+        
+            System.out.printf("%nYou are in the " + player.currentRoom.getName());
+            System.out.println();
+            player.currentRoom.printShortDescription();
+        } else {  
+            System.out.printf("%nYou just satred the game, nothing to go back to!%n");
+        }
+    }
+    
     private void initialize()
     {
         Room hall, secondFloor, study, library, diningRoom, workshop, basement, bedroom;
@@ -167,13 +149,13 @@ public class Game
         
         // create the rooms
         hall = new Room("hall","%nYou stand in a hall of the collector's apartment. Of all paintings that %ndecorate the walls, the one that sticks out to you the most is the portrait of %nwho you assume is the owner of the house. You realize what's so unnerving %nabout the painting - the eyes seem to follow you wherever you go.","%nYou look around.There is a staircase that leads to the second floor, %na door to your right and a door to your left.");
-        diningRoom = new Room("diningRoom","%nYou enter a dining room. The only thing that indicates it's a dining room %nis an ornate table set in the middle of it. A staggering amount of display cases with treasures, %ndecorative urns and reliquaries make it look like a museum more than anything else.","%nOne of the cabinets immediately catches your eye.%nThere is a small sword, a brooch in the form of a star and %na jewelry casket, all decorated with diamonds.");
-        library = new Room("library","%nYou enter a room that is obviously a library, and quite an impressive one. %nYou cannot see the walls - it's all covered by the endless rows of bookshelves.","%nThere is a pile of books on a table in the right corner of the room, %none of them still open. You also notice another door next to it.");
+        diningRoom = new Room("dining Room","%nYou enter a dining room. The only thing that indicates it's a dining room %nis an ornate table set in the middle of it. A staggering amount of display cases with treasures, %ndecorative urns and reliquaries make it look like a museum more than anything else.","%nOne of the cabinets immediately catches your eye.%nThere is a small sword, a brooch in the form of a star and %na jewelry casket, all decorated with diamonds.");
+        library = new Room("library","%nYou walk into a room that is obviously a library, and quite an impressive one. %nYou cannot see the walls - it's all covered by the endless rows of bookshelves.","%nThere is a pile of books on a table in the right corner of the room, %none of them still open. You also notice another door next to it.");
         workshop = new Room("workshop","%nYou enter what you could best describe as a workshop, or a lab of some sort. %nStrange jars with liquids hanging from the ceiling, dozens of %nvial racks and the most peculiar looking workbenches %nmake you question whether it was worth coming here at all.","%nA big red-glowing vial on the desk captures you attention. Beside it lies %na fancy little box. You almost overlook a hatch on the floor, near %nwhat could be a distillation apparatus. You wonder where it leads.");
-        secondFloor = new Room("secondFloor","%nYou come up the stairs and reach the second-floor hall. %nThe clock on the wall shows <currentTime>.","%nYou see two doors - one to your right and another one to your left.");
+        secondFloor = new Room("second Floor","%nYou come up the stairs and reach the second-floor hall. %nThe clock on the wall shows <currentTime>.","%nYou see two doors - one to your right and another one to your left.");
         study = new Room("study","%nYou walk into a room that could be a study, or a personal office.%nMuch like the previous one, it is full of unusual items of all sorts.","%nAside from ancient tablets and armillary spheres that are beyond your understanding,%nyou see a telescope looking through an open window, a drawing board and a desk next to it.%nYou approach the desk. Among various schematics and blueprints %nthere is another casket that you could try to unlock.");
-        basement = new Room("basement", "You come down into the basement. Just when you thought it couldn't get any more %ndisturbing, what lies before you makes want to flee away from this wicked house. %nHowever, you find a way to curb your fear, and proceed further %ninto what looks like a chamber for some twisted experiments. ","%nIn the middle of the room you see a sarcophagus, surrounded by %nclanking machines with cogs and gears. You also notice a small ornate chest, %nnext to some sort of a control panel");
-        bedroom = new Room("bedroom","none","%nJust as you reach for the doorknob you hear a clicking sound coming %nfrom the inside. You lean forward and peek through the keyhole. You are %nsurprised to see a totally normal looking room. There is a lone person sitting in front of a %ncomputer screen; luckily, too carried away to notice anything. You decide that %nit would be wise, not to disclose your presence and carefully step back.");
+        basement = new Room("basement", "%nYou come down into the basement. Just when you thought it couldn't get any more %ndisturbing, what lies before you makes want to flee away from this wicked house. %nHowever, you find a way to curb your fear, and proceed further %ninto what looks like a chamber for some twisted experiments. ","%nIn the middle of the room you see a sarcophagus, surrounded by %nclanking machines with cogs and gears. You also notice a small ornate chest, %nnext to some sort of a control panel");
+        bedroom = new Room("bedroom","%nYou shouldn't be here","%nJust as you reach for the doorknob you hear a clicking sound coming %nfrom the inside. You lean forward and peek through the keyhole. You are %nsurprised to see a totally normal looking room. There is a lone person sitting in front of a %ncomputer screen; luckily, too carried away to notice anything. You decide that %nit would be wise, not to disclose your presence and carefully step back.");
         
         // initialise room exits
         hall.setExit("right", library);
@@ -243,9 +225,17 @@ public class Game
         basement.setItem(basementPanel);
         basement.setItem(basementChest);
         
+        rooms = new ArrayList<>();
+        rooms.add(hall);
+        rooms.add(diningRoom);
+        rooms.add(library);
+        rooms.add(workshop);
+        rooms.add(study);
+        rooms.add(basement);
         player = new Player(hall);  // start Game hall
+        
     }
-
+    
     /**
      * Print out the opening message for the Game.
      */
