@@ -3,14 +3,28 @@
  */
 import java.util.ArrayList;
 
-public class Game
+import java.awt.*;
+import javax.swing.*;
+import java.awt.Dimension;
+
+interface GameInterface {
+    void startGame();
+    boolean processCommand(Command command);
+    void restartGame();
+    void printHelp();
+    void initialize();
+    String printWelcome();
+    void printEnding();
+}
+
+    public class Game implements GameInterface
 {
     public Player player;
     private Parser parser;
     private boolean isFinished = false;
     GameStateTracker stateTracker;
     private ArrayList<Room> rooms;
-     
+    private JFrame frame;
     /**
      * Create the Game and initialise its internal map.
      */
@@ -24,8 +38,7 @@ public class Game
     *  Main play routine. 
     */
     public void startGame()
-    {   
-        printWelcome();
+    {
         stateTracker = new GameStateTracker();
         GameState currentStage = new GameState(player, rooms);
         stateTracker.recordGameState(currentStage);
@@ -52,7 +65,7 @@ public class Game
      * @param command The command to be processed.
      * @return true If the command ends the Game, false otherwise.
     */
-    private boolean processCommand(Command command) 
+    public boolean processCommand(Command command)
     {
         boolean wantToQuit = false;
         
@@ -109,7 +122,7 @@ public class Game
      * Here we print some stupid, cryptic message and a list of the 
      * command words.
      */
-    private void printHelp() 
+    public void printHelp()
     {   
         System.out.println();
         System.out.println("You say the magic word. Nothing happens at first, then");
@@ -123,8 +136,8 @@ public class Game
         
         parser.showCommands();
     }
-    
-    private void reSet(GameState prevStage)
+
+    public void reSet(GameState prevStage)
     {   
         if (prevStage != null) {
             rooms = prevStage.getRooms();
@@ -137,8 +150,8 @@ public class Game
             System.out.printf("%nYou just satred the game, nothing to go back to!%n");
         }
     }
-    
-    private void initialize()
+
+    public void initialize()
     {
         Room hall, secondFloor, study, library, diningRoom, workshop, basement, bedroom;
         Item casketItemClasp,casketItemKey,casketItemCharm,casketItemGemstone;
@@ -239,16 +252,16 @@ public class Game
     /**
      * Print out the opening message for the Game.
      */
-    private void printWelcome()
+    public String printWelcome()
     {
-        System.out.println();
+        
         System.out.printf("You've just sneaked into a house with an enormous private collection %nof ancient relics and valuables to retrieve your family jewels.%n");
         System.out.println("You recall that when in doubt, saying the magic word 'help' may be worth a try.");
         System.out.println("You also recall that you can 'leave' this house anytime you want.");
-        
+        return "You've just sneaked into a house with an enormous private collection %nof ancient relics and valuables to retrieve your family jewels.%n" + "You recall that when in doubt, saying the magic word 'help' may be worth a try.%n" + "You also recall that you can 'leave' this house anytime you want.";
     }
-    
-    private void printEnding()
+
+    public void printEnding()
     {
         if(player.hasWinningCondition()) {   
             System.out.println("You found what you were looking for.");

@@ -13,8 +13,7 @@ public class Player implements Serializable
     
     public Room previousRoom;
     private boolean gameCompleted = false;
-    private final int maxCapacity = 430;
-    
+
     /**
      * Constructor for objects of class Player
      */
@@ -24,7 +23,6 @@ public class Player implements Serializable
         this.inventory = new ArrayList<>();
         this.score = 0;
         this.weight = 0;
-        
         this.previousRoom = currentRoom;
     }
     
@@ -92,7 +90,8 @@ public class Player implements Serializable
                     extractedItem.printDescription();
                     System.out.println();
                 }
-            }   
+            }
+            int maxCapacity = 430;
             if (weight + extractedItem.getWeight() <= maxCapacity) {
                 inventory.add(extractedItem);
                 
@@ -103,7 +102,7 @@ public class Player implements Serializable
                 
                 System.out.println("you put the " + extractedItem.getName() + " inside your bag");
                 System.out.println();
-                System.out.printf("your inventory now: %d/%d%n%n", weight,maxCapacity);
+                System.out.printf("your inventory now: %d/%d%n%n", weight, maxCapacity);
                 printInventory();
             } else if (extractedItem.getWeight() > 500) {
                 System.out.println("Did you really think you could somehow fit that in your bag?");

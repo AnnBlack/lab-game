@@ -1,0 +1,9 @@
+#BlueJ class context
+comment0.target=GameStateTracker
+comment1.params=
+comment1.target=GameStateTracker()
+comment2.params=
+comment2.target=GameState\ getLastGameStage()
+comment3.params=currentGameState
+comment3.target=void\ recordGameState(GameState)
+numComments=4
